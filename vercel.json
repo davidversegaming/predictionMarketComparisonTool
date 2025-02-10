@@ -5,6 +5,11 @@
       "src": "api/index.py",
       "use": "@vercel/python",
       "config": { "runtime": "python3.9" }
+    },
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "frontend/build" }
     }
   ],
   "routes": [
@@ -17,7 +22,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/frontend/build/index.html"
     }
   ]
 } 

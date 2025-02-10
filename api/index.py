@@ -40,10 +40,12 @@ async def get_markets(
                 f"{KALSHI_API_BASE}/markets",
                 params=params
             )
+            print(f"Kalshi API response status: {response.status_code}")  # Add debug logging
             if response.status_code == 200:
                 return response.json()
             raise HTTPException(status_code=response.status_code, detail="Failed to fetch markets")
     except Exception as e:
+        print(f"Error in get_markets: {str(e)}")  # Add debug logging
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/market/{ticker}")
@@ -105,4 +107,4 @@ async def read_root():
 
 @app.get("/api/test")
 async def test_endpoint():
-    return {"status": "ok", "message": "API test endpoint is working"} 
+    return {"status": "ok", "message": "API is working"} 

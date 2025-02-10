@@ -15,17 +15,21 @@ function App() {
     }
 
     try {
-      // Use environment variable for API URL
-      const baseUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000' 
-        : '';
-      let url = `${baseUrl}/api/${viewType}?limit=50`;
+      let url = `/api/${viewType}?limit=50`;
       if (status) url += `&status=${status}`;
       if (category) url += `&category=${category}`;
       if (cursor && !reset) url += `&cursor=${cursor}`;
 
+      console.log('Fetching from:', url);  // Add debug logging
       const response = await fetch(url);
+      console.log('Response status:', response.status);  // Add debug logging
+      
+      if (!response.ok) {
+        throw new Error(`API responded with status ${response.status}`);
+      }
+      
       const responseData = await response.json();
+      console.log('Response data:', responseData);  // Add debug logging
       
       setData(prev => reset ? responseData[viewType] : [...prev, ...responseData[viewType]]);
       setCursor(responseData.cursor);

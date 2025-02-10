@@ -15,3 +15,8 @@ app.add_middleware(
 @app.get("/api/test")
 async def test_endpoint():
     return {"message": "API is working"} 
+
+# Add root endpoint
+@app.get("/")
+async def root():
+    return {"message": "FastAPI root endpoint"} 

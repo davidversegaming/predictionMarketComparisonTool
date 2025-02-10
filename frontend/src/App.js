@@ -7,12 +7,16 @@ function App() {
   const [status, setStatus] = useState('');
   const [category, setCategory] = useState('');
   const [cursor, setCursor] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = async (reset = false) => {
     if (reset) {
       setCursor(null);
       setData([]);
     }
+    setError(null);
+    setLoading(true);
 
     try {
       let url = `/api/${viewType}?limit=50`;
@@ -20,21 +24,24 @@ function App() {
       if (category) url += `&category=${category}`;
       if (cursor && !reset) url += `&cursor=${cursor}`;
 
-      console.log('Fetching from:', url);  // Add debug logging
+      console.log('Fetching from:', url);
       const response = await fetch(url);
-      console.log('Response status:', response.status);  // Add debug logging
+      console.log('Response status:', response.status);
       
       if (!response.ok) {
         throw new Error(`API responded with status ${response.status}`);
       }
       
       const responseData = await response.json();
-      console.log('Response data:', responseData);  // Add debug logging
+      console.log('Response data:', responseData);
       
       setData(prev => reset ? responseData[viewType] : [...prev, ...responseData[viewType]]);
       setCursor(responseData.cursor);
     } catch (error) {
       console.error('Error fetching data:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,15 +115,25 @@ function App() {
         </select>
       </div>
 
-      <div className="content-container">
-        {data.map((item, index) => (
-          viewType === 'markets' ? 
-            <MarketCard key={index} market={item} /> :
-            <EventCard key={index} event={item} />
-        ))}
-      </div>
+      {error && (
+        <div className="error-message">
+          Error: {error}
+        </div>
+      )}
 
-      {cursor && (
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="content-container">
+          {data.map((item, index) => (
+            viewType === 'markets' ? 
+              <MarketCard key={index} market={item} /> :
+              <EventCard key={index} event={item} />
+          ))}
+        </div>
+      )}
+
+      {cursor && !loading && (
         <button className="load-more" onClick={() => fetchData(false)}>
           Load More
         </button>

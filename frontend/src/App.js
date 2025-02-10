@@ -31,8 +31,11 @@ function App() {
   };
 
   useEffect(() => {
-    fetchData(true);
-  }, [viewType, status, category]);
+    const fetchDataWrapper = () => {
+      fetchData(true);
+    };
+    fetchDataWrapper();
+  }, [viewType, status, category]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const MarketCard = ({ market }) => (
     <div className="market-card">

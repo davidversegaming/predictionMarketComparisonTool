@@ -1,9 +1,5 @@
-from fastapi import FastAPI, HTTPException, Header, Query
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import httpx
-import os
-from typing import List, Dict, Optional
-from datetime import datetime
 
 app = FastAPI()
 
@@ -16,95 +12,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-KALSHI_API_BASE = "https://trading-api.kalshi.com/trade-api/v2"
-
-@app.get("/api/markets")
-async def get_markets(
-    status: Optional[str] = Query(None),
-    category: Optional[str] = Query(None),
-    limit: int = Query(default=50, le=1000),
-    cursor: Optional[str] = Query(None)
-):
-    print(f"Received request for markets: status={status}, category={category}, limit={limit}, cursor={cursor}")
-    params = {
-        "limit": limit,
-        "status": status,
-        "category": category,
-    }
-    if cursor:
-        params["cursor"] = cursor
-
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{KALSHI_API_BASE}/markets",
-                params=params
-            )
-            print(f"Kalshi API response status: {response.status_code}")  # Add debug logging
-            if response.status_code == 200:
-                return response.json()
-            raise HTTPException(status_code=response.status_code, detail="Failed to fetch markets")
-    except Exception as e:
-        print(f"Error in get_markets: {str(e)}")  # Add debug logging
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/market/{ticker}")
-async def get_market_details(ticker: str):
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{KALSHI_API_BASE}/markets/{ticker}"
-            )
-            if response.status_code == 200:
-                return response.json()
-            raise HTTPException(status_code=response.status_code, detail="Failed to fetch market details")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/events")
-async def get_events(
-    status: Optional[str] = Query(None),
-    category: Optional[str] = Query(None),
-    limit: int = Query(default=50, le=1000),
-    cursor: Optional[str] = Query(None)
-):
-    params = {
-        "limit": limit,
-        "status": status,
-        "category": category,
-    }
-    if cursor:
-        params["cursor"] = cursor
-
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{KALSHI_API_BASE}/events",
-                params=params
-            )
-            if response.status_code == 200:
-                return response.json()
-            raise HTTPException(status_code=response.status_code, detail="Failed to fetch events")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/event/{event_ticker}")
-async def get_event_details(event_ticker: str):
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{KALSHI_API_BASE}/events/{event_ticker}"
-            )
-            if response.status_code == 200:
-                return response.json()
-            raise HTTPException(status_code=response.status_code, detail="Failed to fetch event details")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/")
-async def read_root():
-    return {"status": "ok", "message": "API is running"}
-
 @app.get("/api/test")
 async def test_endpoint():
-    return {"status": "ok", "message": "API is working"} 
+    return {"message": "API is working"} 

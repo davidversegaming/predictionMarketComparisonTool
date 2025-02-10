@@ -101,4 +101,8 @@ async def get_event_details(event_ticker: str):
 
 @app.get("/")
 async def read_root():
-    return {"message": "Welcome to Kalshi Markets API"} 
+    return {"status": "ok", "message": "API is running"}
+
+@app.get("/api/test")
+async def test_endpoint():
+    return {"status": "ok", "message": "API test endpoint is working"} 

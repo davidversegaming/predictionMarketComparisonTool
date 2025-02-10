@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException, Header, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 import httpx
 import os
 from typing import List, Dict, Optional
@@ -16,9 +15,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Mount static files
-app.mount("/static", StaticFiles(directory="api/static"), name="static")
 
 KALSHI_API_BASE = "https://trading-api.kalshi.com/trade-api/v2"
 

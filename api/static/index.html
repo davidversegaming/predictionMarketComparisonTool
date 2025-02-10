@@ -68,6 +68,10 @@
     <h1>Kalshi Prediction Markets</h1>
     
     <div class="controls">
+        <select id="view-type">
+            <option value="markets">Markets</option>
+            <option value="events">Events</option>
+        </select>
         <select id="status-filter">
             <option value="">All Statuses</option>
             <option value="active">Active</option>
@@ -77,26 +81,27 @@
         <select id="category-filter">
             <option value="">All Categories</option>
         </select>
-        <button onclick="fetchMarkets(true)">Apply Filters</button>
+        <button onclick="fetchData(true)">Apply Filters</button>
     </div>
 
-    <div id="markets-container"></div>
+    <div id="content-container"></div>
     <button id="load-more" class="load-more" onclick="loadMore()">Load More</button>
 
     <script>
         let currentCursor = null;
         
-        async function fetchMarkets(reset = false) {
+        async function fetchData(reset = false) {
             if (reset) {
                 currentCursor = null;
-                document.getElementById('markets-container').innerHTML = '';
+                document.getElementById('content-container').innerHTML = '';
             }
 
+            const viewType = document.getElementById('view-type').value;
             const status = document.getElementById('status-filter').value;
             const category = document.getElementById('category-filter').value;
             
             try {
-                let url = `/api/markets?limit=50`;
+                let url = `/api/${viewType}?limit=50`;
                 if (status) url += `&status=${status}`;
                 if (category) url += `&category=${category}`;
                 if (currentCursor) url += `&cursor=${currentCursor}`;
@@ -104,19 +109,40 @@
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                displayMarkets(data.markets);
-                currentCursor = data.cursor;
+                if (viewType === 'markets') {
+                    displayMarkets(data.markets);
+                } else {
+                    displayEvents(data.events);
+                }
                 
-                // Hide load more button if no more markets
+                currentCursor = data.cursor;
                 document.getElementById('load-more').style.display = 
                     data.cursor ? 'block' : 'none';
             } catch (error) {
-                console.error('Error fetching markets:', error);
+                console.error('Error fetching data:', error);
             }
         }
 
+        function displayEvents(events) {
+            const container = document.getElementById('content-container');
+            events.forEach(event => {
+                const eventElement = document.createElement('div');
+                eventElement.className = 'market-card';
+                eventElement.innerHTML = `
+                    <div class="market-title">${event.title}</div>
+                    <div class="market-details">
+                        <p>Event Ticker: ${event.event_ticker}</p>
+                        <p>Category: ${event.category}</p>
+                        <p>Number of Markets: ${event.market_count}</p>
+                        <p>Status: ${event.status}</p>
+                    </div>
+                `;
+                container.appendChild(eventElement);
+            });
+        }
+
         function displayMarkets(markets) {
-            const container = document.getElementById('markets-container');
+            const container = document.getElementById('content-container');
             markets.forEach(market => {
                 const marketElement = document.createElement('div');
                 marketElement.className = 'market-card';
@@ -142,11 +168,13 @@
         }
 
         function loadMore() {
-            fetchMarkets();
+            fetchData();
         }
 
+        document.getElementById('view-type').addEventListener('change', () => fetchData(true));
+
         // Initial load
-        fetchMarkets(true);
+        fetchData(true);
     </script>
 </body>
 </html> 

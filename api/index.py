@@ -62,6 +62,46 @@ async def get_market_details(ticker: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/events")
+async def get_events(
+    status: Optional[str] = Query(None),
+    category: Optional[str] = Query(None),
+    limit: int = Query(default=50, le=1000),
+    cursor: Optional[str] = Query(None)
+):
+    params = {
+        "limit": limit,
+        "status": status,
+        "category": category,
+    }
+    if cursor:
+        params["cursor"] = cursor
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{KALSHI_API_BASE}/events",
+                params=params
+            )
+            if response.status_code == 200:
+                return response.json()
+            raise HTTPException(status_code=response.status_code, detail="Failed to fetch events")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/event/{event_ticker}")
+async def get_event_details(event_ticker: str):
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{KALSHI_API_BASE}/events/{event_ticker}"
+            )
+            if response.status_code == 200:
+                return response.json()
+            raise HTTPException(status_code=response.status_code, detail="Failed to fetch event details")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/")
 async def read_root():
     return {"message": "Welcome to Kalshi Markets API"} 

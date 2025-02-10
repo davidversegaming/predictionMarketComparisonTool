@@ -24,16 +24,11 @@ KALSHI_API_BASE = "https://trading-api.kalshi.com/trade-api/v2"
 
 @app.get("/api/markets")
 async def get_markets(
-    authorization: Optional[str] = Header(None),
     status: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
     limit: int = Query(default=50, le=1000),
     cursor: Optional[str] = Query(None)
 ):
-    headers = {
-        "Authorization": authorization
-    }
-    
     params = {
         "limit": limit,
         "status": status,
@@ -46,7 +41,6 @@ async def get_markets(
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f"{KALSHI_API_BASE}/markets",
-                headers=headers,
                 params=params
             )
             if response.status_code == 200:
@@ -56,18 +50,11 @@ async def get_markets(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/market/{ticker}")
-async def get_market_details(
-    ticker: str,
-    authorization: Optional[str] = Header(None)
-):
-    headers = {
-        "Authorization": authorization
-    }
+async def get_market_details(ticker: str):
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{KALSHI_API_BASE}/markets/{ticker}",
-                headers=headers
+                f"{KALSHI_API_BASE}/markets/{ticker}"
             )
             if response.status_code == 200:
                 return response.json()

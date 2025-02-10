@@ -25,6 +25,7 @@ async def get_markets(
     limit: int = Query(default=50, le=1000),
     cursor: Optional[str] = Query(None)
 ):
+    print(f"Received request for markets: status={status}, category={category}, limit={limit}, cursor={cursor}")
     params = {
         "limit": limit,
         "status": status,

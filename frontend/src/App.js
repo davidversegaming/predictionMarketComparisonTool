@@ -15,7 +15,11 @@ function App() {
     }
 
     try {
-      let url = `/api/${viewType}?limit=50`;
+      // Use environment variable for API URL
+      const baseUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000' 
+        : '';
+      let url = `${baseUrl}/api/${viewType}?limit=50`;
       if (status) url += `&status=${status}`;
       if (category) url += `&category=${category}`;
       if (cursor && !reset) url += `&cursor=${cursor}`;
